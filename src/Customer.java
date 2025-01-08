@@ -1,4 +1,5 @@
-public class Customer extends Thread {
+// Customer class
+class Customer implements Runnable {
     private final OrderQueue orderQueue;
     private final String order;
 
@@ -9,6 +10,10 @@ public class Customer extends Thread {
 
     @Override
     public void run() {
-        orderQueue.addOrder(order);
+        try {
+            orderQueue.placeOrder(order);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 }

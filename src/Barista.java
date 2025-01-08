@@ -1,4 +1,5 @@
-public class Barista extends Thread {
+// Barista class
+class Barista implements Runnable {
     private final OrderQueue orderQueue;
 
     public Barista(OrderQueue orderQueue) {
@@ -8,17 +9,14 @@ public class Barista extends Thread {
     @Override
     public void run() {
         try {
-            while (true) { // Continuously process orders
-                String order = orderQueue.takeOrder(); // Take order from the queue
-                System.out.println("\nOrder taken : " + order); // Log when an order is taken
-                System.out.println("Preparing: " + order); // Log when preparation starts
-                Thread.sleep(2000); // Simulate coffee preparation time
-                System.out.println("Prepared: " + order +"\n"); // Log when preparation is complete
-
+            while (true) {
+                String order = orderQueue.takeOrder();
+                System.out.println(Thread.currentThread().getName() + " is preparing: " + order);
+                Thread.sleep(2000); // Simulate time taken to prepare the coffee
+                System.out.println(order + " is ready! ENJOY!");
             }
         } catch (InterruptedException e) {
-            Thread.currentThread().interrupt(); // Reset the interrupt flag
-            System.out.println("Barista interrupted while processing orders.");
+            Thread.currentThread().interrupt();
         }
     }
 }
