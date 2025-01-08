@@ -1,46 +1,43 @@
-import java.util.concurrent.locks.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class BankAccount {
-    private final int id;
+    private final String accountNumber;
     private double balance;
-    private final Lock lock;
-    private final List<String> transactionHistory;
+    private final List<String> transactionHistory; // To track transactions
+    private final ReentrantLock lock;
 
-    public BankAccount(int id, double initialBalance) {
-        this.id = id;
-        this.balance = initialBalance;
-        this.lock = new ReentrantLock(true); // Fair lock for access order
+    public BankAccount(String accountNumber, double balance) {
+        this.accountNumber = accountNumber;
+        this.balance = balance;
         this.transactionHistory = new ArrayList<>();
+        this.lock = new ReentrantLock();
     }
 
-    public int getId() {
-        return id;
+    public String getAccountNumber() {
+        return accountNumber;
     }
 
     public double getBalance() {
         return balance;
     }
 
+    public List<String> getTransactionHistory() {
+        return transactionHistory;
+    }
+
     public void deposit(double amount) {
         balance += amount;
-        transactionHistory.add("Deposited: $" + amount);
+        transactionHistory.add("Deposited: " + amount);
     }
 
     public void withdraw(double amount) {
         balance -= amount;
-        transactionHistory.add("Withdrew: $" + amount);
+        transactionHistory.add("Withdrew: " + amount);
     }
 
-    public List<String> getTransactionHistory() {
-        return new ArrayList<>(transactionHistory);
-    }
-
-    public void lock() {
-        lock.lock();
-    }
-
-    public void unlock() {
-        lock.unlock();
+    public ReentrantLock getLock() {
+        return lock;
     }
 }

@@ -1,37 +1,45 @@
-public class TransactionManager {
-    public static void transfer(BankAccount from, BankAccount to, double amount) {
-        // Ensure consistent lock order to prevent deadlocks
-        BankAccount first = from.getId() < to.getId() ? from : to;
-        BankAccount second = from.getId() < to.getId() ? to : from;
+import java.util.concurrent.locks.Lock;
 
-        first.lock();
-        second.lock();
+public class TransactionManager {
+
+    public boolean transferMoney(BankAccount from, BankAccount to, double amount) {
+        Lock firstLock = from.getLock();
+        Lock secondLock = to.getLock();
+
+        // Lock both accounts in a safe order
+        if (from.getAccountNumber().compareTo(to.getAccountNumber()) < 0) {
+            firstLock.lock();
+            secondLock.lock();
+        } else {
+            secondLock.lock();
+            firstLock.lock();
+        }
+
         try {
-            // Check for sufficient funds before proceeding
+            // Check for sufficient balance
             if (from.getBalance() < amount) {
-                System.out.println("Transaction failed: Insufficient funds in Account " + from.getId());
-                return; // Exit without making any changes
+                System.out.println("Insufficient balance for transfer.");
+                return false;
             }
 
-            // Proceed with the transaction
+            // Perform the transfer
             from.withdraw(amount);
             to.deposit(amount);
-            System.out.println("Transferred $" + amount + " from Account " + from.getId() + " to Account " + to.getId());
+            System.out.println("Transferred " + amount + " from " + from.getAccountNumber() + " to " + to.getAccountNumber());
+            return true;
         } catch (Exception e) {
-            System.out.println("Transaction failed: " + e.getMessage());
-            rollback(from, to, amount); // Perform rollback only if necessary
+            System.out.println("Transaction failed, rolling back...");
+            // Rollback in case of failure
+            rollbackTransaction(from, to, amount);
+            return false;
         } finally {
-            second.unlock();
-            first.unlock();
+            firstLock.unlock();
+            secondLock.unlock();
         }
     }
 
-    private static void rollback(BankAccount from, BankAccount to, double amount) {
-        // Reverse transaction only if the amount has been transferred to the destination account
-        if (to.getBalance() >= amount) {
-            to.withdraw(amount);
-            from.deposit(amount);
-            System.out.println("Transaction rolled back: $" + amount + " returned to Account " + from.getId());
-        }
+    private void rollbackTransaction(BankAccount from, BankAccount to, double amount) {
+        from.deposit(amount);  // Reversing the withdrawal
+        to.withdraw(amount);   // Reversing the deposit
     }
 }
