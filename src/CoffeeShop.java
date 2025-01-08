@@ -1,7 +1,7 @@
 // Main class
 public class CoffeeShop {
     public static void main(String[] args) {
-        final int QUEUE_CAPACITY = 1;
+        final int QUEUE_CAPACITY = 5;
         OrderQueue orderQueue = new OrderQueue(QUEUE_CAPACITY);
 
         // Create baristas
